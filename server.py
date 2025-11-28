@@ -13,6 +13,7 @@ class RFPRequest(BaseModel):
     client_name: str
     rfp_title: str
     rfp_content: Optional[str] = None
+    rfp_filename: Optional[str] = None
     rfp_drive_file_id: Optional[str] = None
     team_members: List[str]
     gcp_project: str = "gcp-sandpit-intelia"
@@ -64,8 +65,14 @@ async def run_workflow(request: RFPRequest, background_tasks: BackgroundTasks):
             
         # Scenario 2: Raw Content provided
         elif request.rfp_content:
-            temp_filename = f"temp_rfp_{request.client_name.replace(' ', '_')}.txt"
-            with open(temp_filename, "w") as f:
+            # Use provided filename or generate one
+            if request.rfp_filename:
+                temp_filename = request.rfp_filename
+            else:
+                temp_filename = f"temp_rfp_{request.client_name.replace(' ', '_')}.txt"
+            
+            # Ensure we write text content (Gemini extracts text from PDFs)
+            with open(temp_filename, "w", encoding="utf-8") as f:
                 f.write(request.rfp_content)
             rfp_files.append(os.path.abspath(temp_filename))
             temp_files.append(temp_filename)
