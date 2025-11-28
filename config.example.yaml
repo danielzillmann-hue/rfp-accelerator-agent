@@ -1,0 +1,114 @@
+# RFP Accelerator Agent Configuration
+
+# GCP Project Settings
+gcp_project: "gcp-sandpit-intelia"
+gcp_region: "us-central1"
+
+# Gemini AI Settings
+gemini_model: "gemini-1.5-pro-002"
+gemini_temperature: 0.7
+gemini_max_tokens: 8192
+
+# Google Drive Settings
+drive_parent_folder_id: ""  # Optional: Parent folder for all RFP projects
+drive_folder_template: "{client_name} - {rfp_title} - {date}"
+
+# NotebookLM Settings
+notebooklm_enabled: true
+notebooklm_auto_share: true
+
+# Google Docs Settings
+docs_template_folder_id: ""  # Optional: Folder containing document templates
+docs_default_format:
+  font: "Arial"
+  font_size: 11
+  line_spacing: 1.15
+
+# Email Notification Settings
+email_enabled: true
+email_sender: "rfp-agent@gcp-sandpit-intelia.iam.gserviceaccount.com"
+email_subject_template: "New RFP Project: {client_name} - {rfp_title}"
+email_signature: |
+  Best regards,
+  RFP Accelerator Agent
+  
+  This is an automated message. Please do not reply.
+
+# Internal Knowledge Base
+internal_knowledge_source:
+  type: "drive_folder"  # Options: drive_folder, gcs_bucket, local_path
+  location: ""  # Folder ID, bucket name, or file path
+  
+# Company Information (for draft answers)
+company_info:
+  name: "Your Company Name"
+  address: "123 Business St, City, State, ZIP"
+  phone: "+1 (555) 123-4567"
+  email: "contact@yourcompany.com"
+  website: "https://www.yourcompany.com"
+
+# Workflow Settings
+workflow:
+  # Step 3: Question Generation
+  question_generation:
+    min_questions: 10
+    max_questions: 15
+    categories:
+      - "Technical Requirements"
+      - "Timeline & Milestones"
+      - "Budget & Pricing"
+      - "Team & Resources"
+      - "Integration & Dependencies"
+      - "Security & Compliance"
+  
+  # Step 4: Answer Generation
+  answer_generation:
+    include_boilerplate: true
+    highlight_placeholders: true
+    
+  # Step 5: Project Planning
+  project_planning:
+    default_phases:
+      - "Discovery & Requirements"
+      - "Design & Architecture"
+      - "Development & Implementation"
+      - "Testing & QA"
+      - "Deployment & Training"
+      - "Support & Maintenance"
+    
+  # Step 7: Distribution
+  distribution:
+    share_permissions: "writer"  # Options: reader, commenter, writer
+    send_calendar_invite: false
+
+# Logging Settings
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "json"  # Options: json, text
+  output:
+    - "console"
+    - "file"
+  file_path: "logs/rfp_agent.log"
+  cloud_logging_enabled: true
+
+# Security Settings
+security:
+  data_isolation: true
+  audit_trail: true
+  max_file_size_mb: 50
+  allowed_file_types:
+    - ".pdf"
+    - ".docx"
+    - ".doc"
+    - ".xlsx"
+    - ".xls"
+    - ".pptx"
+    - ".ppt"
+    - ".txt"
+
+# Performance Settings
+performance:
+  max_concurrent_uploads: 5
+  api_retry_attempts: 3
+  api_retry_delay_seconds: 2
+  request_timeout_seconds: 300
