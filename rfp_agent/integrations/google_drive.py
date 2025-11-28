@@ -7,7 +7,7 @@ from pathlib import Path
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from googleapiclient.errors import HttpError
 import structlog
 
@@ -249,3 +249,34 @@ class GoogleDriveClient:
         except HttpError as e:
             self.logger.error(f"Failed to get file metadata: {e}")
             raise
+
+    def download_file(self, file_id: str, destination_path: str) -> str:
+        """
+        Download a file from Google Drive.
+        
+        Args:
+            file_id: ID of the file to download
+            destination_path: Local path to save the file
+            
+        Returns:
+            Path to the downloaded file
+        """
+        try:
+            request = self.service.files().get_media(fileId=file_id)
+            
+            # Get file metadata to check name/type if needed
+            # metadata = self.get_file_metadata(file_id)
+            
+            with open(destination_path, 'wb') as f:
+                downloader = MediaIoBaseDownload(f, request)
+                done = False
+                while done is False:
+                    status, done = downloader.next_chunk()
+            
+            self.logger.info(f"Downloaded file {file_id} to {destination_path}")
+            return destination_path
+            
+        except HttpError as e:
+            self.logger.error(f"Failed to download file {file_id}: {e}")
+            raise
+
