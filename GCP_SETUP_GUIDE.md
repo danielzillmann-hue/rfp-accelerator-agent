@@ -62,7 +62,7 @@ gcloud services enable aiplatform.googleapis.com
 gcloud services enable logging.googleapis.com
 
 # Enable all at once (alternative)
-gcloud services enable drive.googleapis.com docs.googleapis.com gmail.googleapis.com aiplatform.googleapis.com logging.googleapis.com
+gcloud services enable drive.googleapis.com docs.googleapis.com gmail.googleapis.com aiplatform.googleapis.com logging.googleapis.com discoveryengine.googleapis.com
 ```
 
 **Verify APIs are enabled:**
