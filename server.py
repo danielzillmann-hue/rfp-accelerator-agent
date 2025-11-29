@@ -93,7 +93,7 @@ async def run_workflow(request: RFPRequest, background_tasks: BackgroundTasks):
             if os.path.exists(f):
                 os.remove(f)
         
-        return {
+        response = {
             "status": "success", 
             "message": "Workflow completed",
             "resources": {
@@ -102,6 +102,12 @@ async def run_workflow(request: RFPRequest, background_tasks: BackgroundTasks):
                 "plan": result['context'].get('plan_doc_url')
             }
         }
+        
+        # DEBUG: Print the response to logs
+        print(f"DEBUG: Tool Response = {response}")
+        print(f"DEBUG: Full Context = {result.get('context', {})}")
+        
+        return response
         
     except Exception as e:
         # Cleanup on error
