@@ -22,29 +22,6 @@ class KnowledgeBaseStep(WorkflowStep):
         search_client = VertexSearchClient(
             project_id=context['gcp_project'],
             logger=self.logger
-"""
-Step 2: Knowledge Base Creation
-Creates Vertex AI Search Data Store and indexes RFP sources.
-"""
-
-from typing import Dict, Any
-from .base_step import WorkflowStep
-from ..integrations.vertex_search import VertexSearchClient
-
-class KnowledgeBaseStep(WorkflowStep):
-    """Step 2: Knowledge Base Creation (Vertex AI Search)"""
-    
-    def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Execute knowledge base creation step.
-        Creates Data Store and indexes documents.
-        """
-        self.logger.info("Executing Step 2: Knowledge Base Creation (Vertex AI Search)")
-        
-        # Initialize Vertex Search client
-        search_client = VertexSearchClient(
-            project_id=context['gcp_project'],
-            logger=self.logger
         )
         
         # Create Data Store
@@ -58,9 +35,9 @@ class KnowledgeBaseStep(WorkflowStep):
         # Return a dummy or existing data store ID if you have one
         # For now, we'll just return None so the workflow continues without grounding
         return {
-            "status": "success", # Added status for consistency
-            "data_store_id": "test-data-store-id", # Renamed for consistency
-            "data_store_name": "projects/test-project/locations/global/dataStores/test-data-store-id", # Added for consistency
+            "status": "success",
+            "data_store_id": "test-data-store-id",
+            "data_store_name": "projects/test-project/locations/global/dataStores/test-data-store-id",
             "serving_config": None,  # This disables grounding in later steps
             "context_updates": {
                 "knowledge_base_id": "test-data-store-id",
@@ -107,5 +84,3 @@ class KnowledgeBaseStep(WorkflowStep):
                 'error': str(e)
             }
         """
-
-```
