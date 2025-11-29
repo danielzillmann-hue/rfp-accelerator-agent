@@ -1,3 +1,4 @@
+
 """
 Step 4: Draft Answer Generation
 Generates draft answers to RFP questions using internal knowledge.
@@ -49,11 +50,17 @@ class AnswerGenerationStep(WorkflowStep):
         # Load internal knowledge if available
         internal_knowledge = self._load_internal_knowledge()
         
+        # Get grounding source if available
+        grounding_source = context.get('grounding_source')
+        if grounding_source:
+            self.logger.info(f"Using grounding source: {grounding_source}")
+        
         # Generate draft answers
-        draft_answers = gemini_client.generate_draft_answers(
-            rfp_questions=rfp_questions,
+        draft_answers = gemini_client.draft_rfp_answers(
+            questions=rfp_questions,
             company_info=company_info,
-            internal_knowledge=internal_knowledge
+            internal_knowledge=internal_knowledge,
+            grounding_source=grounding_source
         )
         
         self.logger.info(f"Generated {len(draft_answers)} draft answers")
@@ -90,19 +97,14 @@ class AnswerGenerationStep(WorkflowStep):
     def _extract_questions_from_rfp(self, text: str) -> List[str]:
         """
         Extract questions from RFP text using pattern matching.
-        
-        Looks for numbered questions, question marks, and common RFP patterns.
         """
         questions = []
-        
-        # Split into lines
         lines = text.split('\n')
         
         # Pattern 1: Lines ending with question marks
         for line in lines:
             line = line.strip()
             if line.endswith('?') and len(line) > 20:
-                # Remove numbering if present
                 clean_line = re.sub(r'^\d+[\.\)]\s*', '', line)
                 questions.append(clean_line)
         
@@ -116,11 +118,9 @@ class AnswerGenerationStep(WorkflowStep):
                     if clean_line not in questions:
                         questions.append(clean_line)
         
-        # Limit to reasonable number
         if len(questions) > 20:
             questions = questions[:20]
         
-        # If no questions found, add some generic ones
         if not questions:
             questions = [
                 "Describe your company's experience with similar projects.",
@@ -135,11 +135,7 @@ class AnswerGenerationStep(WorkflowStep):
     def _load_internal_knowledge(self) -> str:
         """Load internal knowledge base content."""
         knowledge_config = self._get_config_value('internal_knowledge_source', {})
-        
         if not knowledge_config:
             return ""
-        
-        # For now, return empty string
-        # In production, this would load from Drive, GCS, or local file
         self.logger.info("Internal knowledge source not configured")
         return ""

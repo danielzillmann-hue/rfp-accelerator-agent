@@ -1,74 +1,66 @@
+
 """
 Step 2: Knowledge Base Creation
-Creates NotebookLM notebook and adds RFP sources.
+Creates Vertex AI Search Data Store and indexes RFP sources.
 """
 
 from typing import Dict, Any
-
 from .base_step import WorkflowStep
-from ..integrations.notebooklm import NotebookLMClient
-
+from ..integrations.vertex_search import VertexSearchClient
 
 class KnowledgeBaseStep(WorkflowStep):
-    """Step 2: Knowledge Base Creation"""
+    """Step 2: Knowledge Base Creation (Vertex AI Search)"""
     
     def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute knowledge base creation step.
-        
-        Creates NotebookLM notebook and adds RFP documents as sources.
+        Creates Data Store and indexes documents.
         """
-        self.logger.info("Executing Step 2: Knowledge Base Creation")
+        self.logger.info("Executing Step 2: Knowledge Base Creation (Vertex AI Search)")
         
-        # Initialize NotebookLM client
-        notebooklm_client = NotebookLMClient(
+        # Initialize Vertex Search client
+        search_client = VertexSearchClient(
             project_id=context['gcp_project'],
             logger=self.logger
         )
         
-        # Create notebook
-        notebook_name = f"{context['client_name']} - {context['rfp_title']}"
-        notebook = notebooklm_client.create_notebook(
-            name=notebook_name,
-            description=f"RFP Knowledge Base for {context['client_name']}"
-        )
+        # Create Data Store
+        display_name = f"{context['client_name']} - {context['rfp_title']}"
+        self.logger.info(f"Creating Data Store: {display_name}")
         
-        self.logger.info(f"Created NotebookLM notebook: {notebook_name}")
-        
-        # Add source documents
-        sources_added = []
-        for file_info in context.get('uploaded_files', []):
-            source_result = notebooklm_client.add_source(
-                notebook_id=notebook['id'],
-                source_url=file_info['url'],
-                source_type='document'
-            )
-            sources_added.append(source_result)
-            self.logger.info(f"Added source: {file_info['name']}")
-        
-        # Get notebook status
-        status = notebooklm_client.get_notebook_status(notebook['id'])
-        
-        # Generate manual instructions if API is placeholder
-        manual_instructions = None
-        if notebook.get('status') == 'placeholder':
-            file_names = [f['name'] for f in context.get('uploaded_files', [])]
-            manual_instructions = NotebookLMClient.get_manual_instructions(
-                notebook_name,
-                file_names
-            )
-            self.logger.warning("NotebookLM API not available - manual setup required")
-            self.logger.info(manual_instructions)
-        
-        return {
-            'status': 'success',
-            'notebook': notebook,
-            'sources_added': sources_added,
-            'notebook_status': status,
-            'manual_instructions': manual_instructions,
-            'context_updates': {
-                'notebook_id': notebook['id'],
-                'notebook_url': notebook['url'],
-                'notebooklm_manual_setup': manual_instructions,
+        try:
+            # Create the Data Store
+            data_store = search_client.create_data_store(display_name)
+            
+            # Get the serving config (resource name needed for grounding)
+            serving_config = search_client.get_serving_config(data_store['id'])
+            
+            # Import documents from the Drive folder created in Step 1
+            # Note: This assumes the Drive folder ID is available in context
+            drive_folder_id = context.get('main_folder_id')
+            if drive_folder_id:
+                search_client.import_documents_from_drive(data_store['id'], drive_folder_id)
+            else:
+                self.logger.warning("No Drive folder ID found, skipping document import")
+            
+            self.logger.info(f"Knowledge Base ready: {data_store['name']}")
+            
+            return {
+                'status': 'success',
+                'data_store_id': data_store['id'],
+                'data_store_name': data_store['name'],
+                'serving_config': serving_config,
+                'context_updates': {
+                    'knowledge_base_id': data_store['id'],
+                    'grounding_source': serving_config, # This is passed to Gemini
+                }
             }
-        }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create Knowledge Base: {e}")
+            # In a real scenario, we might want to fail hard here, 
+            # but for robustness we'll return failure status
+            return {
+                'status': 'failed',
+                'error': str(e)
+            }

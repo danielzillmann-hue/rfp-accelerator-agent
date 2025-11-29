@@ -1,3 +1,4 @@
+
 """
 Step 3: Question Generation
 Analyzes RFP and generates critical follow-up questions.
@@ -32,6 +33,7 @@ class QuestionGenerationStep(WorkflowStep):
         docs_client = GoogleDocsClient(logger=self.logger)
         
         # Parse all RFP documents and combine text
+        # (We still pass text as context, but grounding adds retrieval)
         combined_text = ""
         for file_path in context['rfp_files']:
             doc_info = DocumentParser.parse_document(file_path)
@@ -40,6 +42,11 @@ class QuestionGenerationStep(WorkflowStep):
         
         self.logger.info(f"Analyzing {len(context['rfp_files'])} RFP documents")
         
+        # Get grounding source if available (from Step 2)
+        grounding_source = context.get('grounding_source')
+        if grounding_source:
+            self.logger.info(f"Using grounding source: {grounding_source}")
+        
         # Generate questions using Gemini
         min_questions = self._get_config_value('workflow.question_generation.min_questions', 10)
         max_questions = self._get_config_value('workflow.question_generation.max_questions', 15)
@@ -47,7 +54,8 @@ class QuestionGenerationStep(WorkflowStep):
         questions = gemini_client.generate_follow_up_questions(
             document_text=combined_text,
             min_questions=min_questions,
-            max_questions=max_questions
+            max_questions=max_questions,
+            grounding_source=grounding_source
         )
         
         self.logger.info(f"Generated {len(questions)} follow-up questions")
