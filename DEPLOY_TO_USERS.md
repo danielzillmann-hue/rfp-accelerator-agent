@@ -27,6 +27,25 @@ This makes your agent available as a bot in Google Chat, which is the most natur
     *   Under **"Who can install"**, select **"Entire domain"** (to let everyone use it) or limit to specific groups for testing.
 9.  Click **Save**.
 
+### 2.1 Configure Google Workspace Marketplace SDK (CRITICAL for Visibility)
+Even for internal apps, you **must** configure the Marketplace SDK for the app to appear in the search.
+
+1.  Go to **APIs & Services > Enabled APIs & Services**.
+2.  Click **+ ENABLE APIS AND SERVICES**.
+3.  Search for **"Google Workspace Marketplace SDK"** and click **Enable**.
+4.  Once enabled, click **Manage** (or go to it from the dashboard).
+5.  Click **App Configuration** in the left sidebar.
+    *   **App Integration:** Select **"Chat app"**.
+    *   Click **Save**.
+6.  Click **Store Listing** in the left sidebar.
+    *   **App Name:** "RFP Accelerator".
+    *   **Short Description:** "AI Agent for RFPs".
+    *   **Detailed Description:** "AI Agent to automate RFP project setup".
+    *   **Graphics:** Upload the required icons (you can use placeholders for now).
+    *   **Support Information:** Enter your email.
+    *   **Installation Settings:** Select **"Private"** (Visible to users in my domain).
+    *   Click **Save**.
+
 ### 3. Test in Google Chat
 1.  Open [Google Chat](https://chat.google.com).
 2.  Click **New chat** (+) > **Find apps**.
