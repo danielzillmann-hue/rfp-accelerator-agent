@@ -13,11 +13,21 @@ class RFPRequest(BaseModel):
     rfp_content: Optional[str] = "Sample RFP content"
     team_members: List[str] = []
 
+class RFPResources(BaseModel):
+    folder: str
+    questions: str
+    plan: str
+
+class RFPResponse(BaseModel):
+    status: str
+    message: str
+    resources: RFPResources
+
 @app.get("/")
 def health_check():
     return {"status": "healthy", "service": "RFP Accelerator Agent"}
 
-@app.post("/run-workflow")
+@app.post("/run-workflow", response_model=RFPResponse)
 async def run_workflow(request: RFPRequest):
     """
     Simplified workflow - just creates Drive folder and returns link.
