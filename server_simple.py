@@ -37,6 +37,20 @@ async def run_workflow(request: RFPRequest):
         
         print(f"DEBUG: Folder created: {folder_structure['main_folder_url']}")
         
+        # Share with team members
+        if request.team_members:
+            print(f"DEBUG: Sharing with {request.team_members}")
+            drive_client.share_folder(
+                folder_structure['main_folder_id'],
+                request.team_members,
+                role='writer'
+            )
+        else:
+            # Fallback: Share with a default email if provided in env var, or log warning
+            print("WARNING: No team members provided. Folder will be private to Service Account.")
+            # You might want to hardcode your email here for testing:
+            # drive_client.share_folder(folder_structure['main_folder_id'], ['daniel.zillmann@intelia.com.au'], role='writer')
+
         # Format the response with URLs in the message so the Agent can't ignore them
         folder_url = folder_structure['main_folder_url']
         analysis_url = folder_structure['subfolders']['analysis']['url']
@@ -48,7 +62,7 @@ Drive Folder: {folder_url}
 Analysis Folder: {analysis_url}
 Planning Folder: {planning_url}
 
-Please share these links with your team."""
+IMPORTANT: If you cannot access these links, ensure you provided your email address in the 'team_members' list."""
         
         response = {
             "status": "success", 
