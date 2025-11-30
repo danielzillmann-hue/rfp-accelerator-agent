@@ -114,9 +114,13 @@ class GoogleDriveClient:
             fields='id, webViewLink'
         ).execute()
         
+        # Manually construct URL to ensure it's correct and clean
+        # webViewLink from API can sometimes be missing or malformed for Service Accounts
+        folder_url = f"https://drive.google.com/drive/folders/{folder['id']}"
+        
         return {
             'id': folder['id'],
-            'url': folder['webViewLink']
+            'url': folder_url
         }
     
     def upload_file(
