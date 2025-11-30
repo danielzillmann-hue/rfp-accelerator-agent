@@ -3,6 +3,37 @@ import json
 from fastapi.openapi.utils import get_openapi
 from server_simple import app
 
+def fix_openapi_spec(schema):
+    """
+    Recursively fix OpenAPI 3.0 compatibility issues.
+    Vertex AI doesn't like 'type': 'null' or 'anyOf' with null.
+    It prefers 'nullable': true.
+    """
+    if isinstance(schema, dict):
+        # Fix "anyOf": [{"type": "string"}, {"type": "null"}] -> "type": "string", "nullable": true
+        if "anyOf" in schema:
+            types = schema["anyOf"]
+            if len(types) == 2:
+                null_type = next((t for t in types if t.get("type") == "null"), None)
+                other_type = next((t for t in types if t.get("type") != "null"), None)
+                
+                if null_type and other_type:
+                    schema.pop("anyOf")
+                    schema.update(other_type)
+                    schema["nullable"] = True
+        
+        # Fix simple "type": "null" (rare but possible)
+        if schema.get("type") == "null":
+            schema.pop("type")
+            schema["nullable"] = True
+            
+        for key, value in schema.items():
+            fix_openapi_spec(value)
+            
+    elif isinstance(schema, list):
+        for item in schema:
+            fix_openapi_spec(item)
+
 # Generate the OpenAPI schema
 openapi_schema = get_openapi(
     title=app.title,
@@ -10,6 +41,9 @@ openapi_schema = get_openapi(
     openapi_version="3.0.2",
     routes=app.routes,
 )
+
+# Apply fixes
+fix_openapi_spec(openapi_schema)
 
 # Add the servers section with the Cloud Run URL
 openapi_schema["servers"] = [
@@ -23,4 +57,5 @@ openapi_schema["servers"] = [
 with open("openapi.json", "w") as f:
     json.dump(openapi_schema, f, indent=2)
 
-print("✅ openapi.json generated for simplified server!")
+print("✅ openapi.json generated for simplified server with fixes!")
+
