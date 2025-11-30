@@ -65,9 +65,9 @@ async def run_workflow(request: RFPRequest):
         
         message = f"""Project workspace created successfully!
 
-*   [Open Drive Folder]({folder_url})
-*   [Open Analysis Folder]({analysis_url})
-*   [Open Planning Folder]({planning_url})
+Drive Folder: {folder_url}
+Analysis Folder: {analysis_url}
+Planning Folder: {planning_url}
 
 IMPORTANT: If you cannot access these links, ensure you provided your email address in the 'team_members' list."""
         
