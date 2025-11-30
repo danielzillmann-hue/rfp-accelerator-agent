@@ -20,5 +20,5 @@ COPY . .
 # Expose port
 ENV PORT=8080
 
-# Run the web server
-CMD ["python", "server.py"]
+# Run the simplified web server for testing
+CMD ["python", "server_simple.py"]
