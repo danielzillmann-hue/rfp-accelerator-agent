@@ -45,11 +45,18 @@ async def run_workflow(request: RFPRequest):
                 request.team_members,
                 role='writer'
             )
-        else:
-            # Fallback: Share with a default email if provided in env var, or log warning
-            print("WARNING: No team members provided. Folder will be private to Service Account.")
-            # You might want to hardcode your email here for testing:
-            # drive_client.share_folder(folder_structure['main_folder_id'], ['daniel.zillmann@intelia.com.au'], role='writer')
+        
+        # FALLBACK FOR TESTING: Make public to anyone with link
+        # This ensures the user can access it even if email sharing fails
+        print("DEBUG: Making folder public for testing...")
+        try:
+            drive_client.service.permissions().create(
+                fileId=folder_structure['main_folder_id'],
+                body={'type': 'anyone', 'role': 'reader'},
+                fields='id'
+            ).execute()
+        except Exception as e:
+            print(f"WARNING: Failed to make public: {e}")
 
         # Format the response with URLs in the message so the Agent can't ignore them
         folder_url = folder_structure['main_folder_url']
