@@ -37,13 +37,26 @@ async def run_workflow(request: RFPRequest):
         
         print(f"DEBUG: Folder created: {folder_structure['main_folder_url']}")
         
+        # Format the response with URLs in the message so the Agent can't ignore them
+        folder_url = folder_structure['main_folder_url']
+        analysis_url = folder_structure['subfolders']['analysis']['url']
+        planning_url = folder_structure['subfolders']['planning']['url']
+        
+        message = f"""Project workspace created successfully!
+
+Drive Folder: {folder_url}
+Analysis Folder: {analysis_url}
+Planning Folder: {planning_url}
+
+Please share these links with your team."""
+        
         response = {
             "status": "success", 
-            "message": "Project workspace created successfully",
+            "message": message,
             "resources": {
-                "folder": folder_structure['main_folder_url'],
-                "questions": folder_structure['subfolders']['analysis']['url'],
-                "plan": folder_structure['subfolders']['planning']['url']
+                "folder": folder_url,
+                "questions": analysis_url,
+                "plan": planning_url
             }
         }
         
