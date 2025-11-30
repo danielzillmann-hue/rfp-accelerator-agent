@@ -45,8 +45,16 @@ openapi_schema = get_openapi(
 # Apply fixes
 fix_openapi_spec(openapi_schema)
 
+# Add the servers section with the Cloud Run URL
+openapi_schema["servers"] = [
+    {
+        "url": "https://rfp-agent-service-566828750593.us-central1.run.app",
+        "description": "Production Cloud Run Service"
+    }
+]
+
 # Save to file
 with open("openapi.json", "w") as f:
     json.dump(openapi_schema, f, indent=2)
 
-print("✅ openapi.json (v3.0.2) generated successfully with null-type fixes!")
+print("✅ openapi.json (v3.0.2) generated successfully with null-type fixes and server URL!")
