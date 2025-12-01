@@ -20,5 +20,5 @@ COPY . .
 # Expose port
 ENV PORT=8080
 
-# Run the simplified web server for testing
-CMD ["python", "server_simple.py"]
+# Run the main FastAPI server (with JSON API and HTML UI)
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
