@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RFP Accelerator Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <header class="border-b border-slate-800 bg-slate-900/70 backdrop-blur">
+      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500 text-white font-bold">R</span>
+          <div>
+            <h1 class="text-lg font-semibold tracking-tight">RFP Accelerator Agent</h1>
+            <p class="text-xs text-slate-400">Automated project kickoff workspace creator</p>
+          </div>
+        </div>
+        <span class="text-xs text-slate-400">NotebookLM • Google Drive • Docs • Workspace</span>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <div class="max-w-5xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)]">
+        <!-- Form card -->
+        <section class="bg-slate-900/60 border border-slate-800 rounded-2xl shadow-lg shadow-slate-950/40 p-6 md:p-8">
+          <h2 class="text-base font-semibold mb-1">Create a new RFP workspace</h2>
+          <p class="text-sm text-slate-400 mb-6">
+            Provide basic RFP details, either paste the RFP content or link a Google Drive file, and the
+            agent will set up the full workspace with NotebookLM, folders, and documents.
+          </p>
+
+          <form method="post" action="/ui/run-workflow" class="space-y-5">
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="space-y-1.5">
+                <label for="client_name" class="block text-sm font-medium text-slate-200">Client name</label>
+                <input
+                  id="client_name"
+                  name="client_name"
+                  type="text"
+                  required
+                  class="w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="ACME Corp"
+                />
+              </div>
+              <div class="space-y-1.5">
+                <label for="rfp_title" class="block text-sm font-medium text-slate-200">RFP title</label>
+                <input
+                  id="rfp_title"
+                  name="rfp_title"
+                  type="text"
+                  required
+                  class="w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Data Platform RFP 2025"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-sm font-medium text-slate-200">RFP source</label>
+              <p class="text-xs text-slate-400 mb-2">
+                Use <span class="font-semibold text-slate-200">either</span> inline content or a Google Drive file URL/ID.
+              </p>
+              <div class="grid gap-4 md:grid-cols-2">
+                <div class="space-y-1.5">
+                  <label for="rfp_content" class="block text-xs font-medium text-slate-300">Inline content</label>
+                  <textarea
+                    id="rfp_content"
+                    name="rfp_content"
+                    rows="7"
+                    class="w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Paste RFP text here (optional if you provide a Drive file)..."
+                  ></textarea>
+                </div>
+                <div class="space-y-1.5">
+                  <label for="rfp_drive_file_id" class="block text-xs font-medium text-slate-300">Google Drive file URL or ID</label>
+                  <input
+                    id="rfp_drive_file_id"
+                    name="rfp_drive_file_id"
+                    type="text"
+                    class="w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 mb-3"
+                    placeholder="https://drive.google.com/file/d/..."
+                  />
+                  <p class="text-xs text-slate-500">
+                    The backend will download the file, ingest it into the workflow, and use it as the primary RFP
+                    document.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="space-y-1.5">
+                <label for="team_members" class="block text-sm font-medium text-slate-200">Team member emails</label>
+                <input
+                  id="team_members"
+                  name="team_members"
+                  type="text"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="alice@example.com, bob@client.com"
+                />
+                <p class="text-xs text-slate-500">
+                  Comma- or semicolon-separated list. These are used for sharing the workspace and documents.
+                </p>
+              </div>
+              <div class="space-y-1.5">
+                <label for="gcp_project" class="block text-sm font-medium text-slate-200">GCP project ID</label>
+                <input
+                  id="gcp_project"
+                  name="gcp_project"
+                  type="text"
+                  value="gcp-sandpit-intelia"
+                  class="w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <p class="text-xs text-slate-500">
+                  The GCP project where Drive, Docs, NotebookLM, and Gemini integrations are configured.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-slate-800 mt-2">
+              <p class="text-xs text-slate-500 max-w-xs">
+                Submitting will run the full RFP workflow (ingestion, knowledge base, NotebookLM, docs and plan
+                generation, collaboration setup, and distribution).
+              </p>
+              <button
+                type="submit"
+                class="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+              >
+                <span>Run workflow</span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Results / status card -->
+        <section class="space-y-4">
+          <div class="bg-slate-900/60 border border-slate-800 rounded-2xl shadow-lg shadow-slate-950/40 p-6 md:p-7">
+            <h2 class="text-base font-semibold mb-1">Workspace status</h2>
+            <p class="text-sm text-slate-400 mb-4">
+              After running the workflow, links to the generated resources will appear here.
+            </p>
+
+            {% if error %}
+            <div class="mb-4 rounded-lg border border-red-500/50 bg-red-950/40 px-3 py-2 text-sm text-red-100">
+              <strong class="font-semibold">Error:</strong>
+              <span class="ml-1">{{ error }}</span>
+            </div>
+            {% endif %}
+
+            {% if result %}
+            <dl class="space-y-3 text-sm">
+              <div>
+                <dt class="text-slate-400">Status</dt>
+                <dd class="font-medium text-emerald-400">{{ result.status | default("success") }}</dd>
+              </div>
+              <div class="pt-2 border-t border-slate-800">
+                <dt class="text-slate-400 mb-1">Project folder</dt>
+                <dd>
+                  {% if result.resources.folder %}
+                  <a
+                    href="{{ result.resources.folder }}"
+                    target="_blank"
+                    class="text-indigo-400 hover:text-indigo-300 underline"
+                    >Open project folder</a
+                  >
+                  {% else %}
+                  <span class="text-slate-500">No folder URL returned</span>
+                  {% endif %}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-slate-400 mb-1">Analysis / questions document</dt>
+                <dd>
+                  {% if result.resources.questions %}
+                  <a
+                    href="{{ result.resources.questions }}"
+                    target="_blank"
+                    class="text-indigo-400 hover:text-indigo-300 underline"
+                    >Open questions / analysis doc</a
+                  >
+                  {% else %}
+                  <span class="text-slate-500">No questions document URL returned</span>
+                  {% endif %}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-slate-400 mb-1">Project plan</dt>
+                <dd>
+                  {% if result.resources.plan %}
+                  <a
+                    href="{{ result.resources.plan }}"
+                    target="_blank"
+                    class="text-indigo-400 hover:text-indigo-300 underline"
+                    >Open project plan</a
+                  >
+                  {% else %}
+                  <span class="text-slate-500">No project plan URL returned</span>
+                  {% endif %}
+                </dd>
+              </div>
+            </dl>
+
+            <div class="mt-5 rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-2 text-xs text-slate-400">
+              <p class="font-medium mb-1 text-slate-200">NotebookLM & workflow details</p>
+              <p>
+                The backend orchestrator uses your configuration to create or update a NotebookLM notebook, ingest RFP
+                sources, generate follow-up questions and draft answers, and prepare a project plan and collaboration
+                setup. Check your Google Workspace for shared documents and notebook access.
+              </p>
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-500">
+              Submit the form on the left to create a new workspace. Once complete, this panel will show the generated
+              resource links.
+            </p>
+            {% endif %}
+          </div>
+
+          <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 text-xs text-slate-400">
+            <p class="font-medium mb-1 text-slate-200">Notes</p>
+            <ul class="list-disc list-inside space-y-1">
+              <li>
+                Make sure the service account / credentials used by this app have access to Google Drive, Docs,
+                NotebookLM, and Workspace as configured in your <code class="px-1 py-0.5 rounded bg-slate-800">config.yaml</code>.
+              </li>
+              <li>
+                Team members you list here will be used for sharing the workspace and documents in Google Drive / Docs.
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

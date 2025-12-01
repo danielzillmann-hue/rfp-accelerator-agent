@@ -1,13 +1,15 @@
-
 import os
 import re
 from typing import List, Optional
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from rfp_agent import RFPAcceleratorAgent
 from rfp_agent.integrations.google_drive import GoogleDriveClient
 
 app = FastAPI(title="RFP Accelerator Agent API")
+templates = Jinja2Templates(directory="templates")
 
 class RFPRequest(BaseModel):
     client_name: str
@@ -27,6 +29,18 @@ def extract_file_id(input_str: str) -> str:
 @app.get("/")
 def health_check():
     return {"status": "healthy", "service": "RFP Accelerator Agent"}
+
+@app.get("/ui", response_class=HTMLResponse)
+async def ui_home(request: Request):
+    """Render the main HTML interface for the RFP Accelerator Agent."""
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "result": None,
+            "error": None,
+        },
+    )
 
 @app.post("/run-workflow")
 async def run_workflow(request: RFPRequest, background_tasks: BackgroundTasks):
@@ -115,6 +129,53 @@ async def run_workflow(request: RFPRequest, background_tasks: BackgroundTasks):
             if os.path.exists(f):
                 os.remove(f)
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/ui/run-workflow", response_class=HTMLResponse)
+async def run_workflow_form(
+    request: Request,
+    client_name: str = Form(...),
+    rfp_title: str = Form(...),
+    rfp_content: Optional[str] = Form(None),
+    rfp_drive_file_id: Optional[str] = Form(None),
+    team_members: Optional[str] = Form(None),
+    gcp_project: str = Form("gcp-sandpit-intelia"),
+):
+    """HTML form handler that triggers the RFP workflow and renders results."""
+    # Parse team members from comma/space separated string
+    team_list: List[str] = []
+    if team_members:
+        raw_items = [item.strip() for item in team_members.replace(";", ",").split(",")]
+        team_list = [item for item in raw_items if item]
+    
+    api_request = RFPRequest(
+        client_name=client_name,
+        rfp_title=rfp_title,
+        rfp_content=rfp_content or None,
+        rfp_filename=None,
+        rfp_drive_file_id=rfp_drive_file_id or None,
+        team_members=team_list,
+        gcp_project=gcp_project,
+    )
+    
+    try:
+        result = await run_workflow(api_request, BackgroundTasks())
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "result": result,
+                "error": None,
+            },
+        )
+    except HTTPException as exc:
+        return templates.TemplateResponse(
+            "index.html",
+            {
+                "request": request,
+                "result": None,
+                "error": exc.detail,
+            },
+        )
 
 if __name__ == "__main__":
     import uvicorn
