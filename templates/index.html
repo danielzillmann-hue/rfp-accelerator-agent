@@ -216,6 +216,49 @@
               </div>
             </dl>
 
+            {% if result.uploaded_files %}
+            <div class="mt-5 pt-4 border-t border-slate-800">
+              <p class="text-sm font-semibold mb-2">Source documents</p>
+              <div class="max-h-52 overflow-auto rounded-lg border border-slate-800 bg-slate-950/40">
+                <table class="min-w-full text-xs">
+                  <thead class="bg-slate-900/80 text-slate-300">
+                    <tr>
+                      <th class="px-3 py-2 text-left font-medium">Name</th>
+                      <th class="px-3 py-2 text-left font-medium">Variant</th>
+                      <th class="px-3 py-2 text-left font-medium">Link</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-800">
+                    {% for f in result.uploaded_files %}
+                    <tr class="hover:bg-slate-900/60">
+                      <td class="px-3 py-1.5 text-slate-100 break-all">{{ f.name }}</td>
+                      <td class="px-3 py-1.5 text-slate-400">
+                        {% if f.metadata and f.metadata.variant %}
+                          {{ f.metadata.variant }}{% if f.metadata.derived_from %} (from {{ f.metadata.derived_from }}){% endif %}
+                        {% else %}
+                          original
+                        {% endif %}
+                      </td>
+                      <td class="px-3 py-1.5">
+                        {% if f.url %}
+                        <a
+                          href="{{ f.url }}"
+                          target="_blank"
+                          class="text-indigo-400 hover:text-indigo-300 underline"
+                          >Open</a
+                        >
+                        {% else %}
+                        <span class="text-slate-500">N/A</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            {% endif %}
+
             <div class="mt-5 rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-2 text-xs text-slate-400">
               <p class="font-medium mb-1 text-slate-200">NotebookLM & workflow details</p>
               <p>
@@ -223,6 +266,12 @@
                 sources, generate follow-up questions and draft answers, and prepare a project plan and collaboration
                 setup. Check your Google Workspace for shared documents and notebook access.
               </p>
+              {% if result.notebooklm_manual_setup %}
+              <details class="mt-2">
+                <summary class="cursor-pointer text-slate-300">Show manual NotebookLM setup instructions</summary>
+                <pre class="mt-1 whitespace-pre-wrap text-[11px] text-slate-400">{{ result.notebooklm_manual_setup }}</pre>
+              </details>
+              {% endif %}
             </div>
             {% else %}
             <p class="text-xs text-slate-500">

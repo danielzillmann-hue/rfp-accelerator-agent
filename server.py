@@ -57,14 +57,18 @@ def _execute_workflow(rfp_files: List[str], client_name: str, rfp_title: str, te
         team_members=team_members,
     )
 
+    context = result.get("context", {})
+
     response = {
         "status": "success",
         "message": "Workflow completed",
         "resources": {
-            "folder": result["context"].get("folder_url"),
-            "questions": result["context"].get("questions_doc_url"),
-            "plan": result["context"].get("plan_doc_url"),
+            "folder": context.get("folder_url"),
+            "questions": context.get("questions_doc_url"),
+            "plan": context.get("plan_doc_url"),
         },
+        "uploaded_files": context.get("uploaded_files", []),
+        "notebooklm_manual_setup": context.get("notebooklm_manual_setup"),
     }
 
     # DEBUG: Print the response to logs

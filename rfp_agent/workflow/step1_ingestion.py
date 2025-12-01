@@ -47,10 +47,10 @@ class IngestionStep(WorkflowStep):
         source_folder_id = folder_structure['subfolders']['source_documents']['id']
         
         for file_path in context['rfp_files']:
-            # Parse document to extract metadata
+            # Parse document to extract metadata and any derived files
             doc_info = DocumentParser.parse_document(file_path)
             
-            # Upload to Drive
+            # Upload original to Drive
             file_result = drive_client.upload_file(
                 file_path,
                 source_folder_id
@@ -64,6 +64,27 @@ class IngestionStep(WorkflowStep):
             })
             
             self.logger.info(f"Uploaded: {doc_info['file_info']['name']}")
+
+            # If the parser produced NotebookLM-friendly derivatives (e.g., from Excel), upload those too
+            derived_files = doc_info.get('derived_files', {})
+            for label, derived_path in derived_files.items():
+                try:
+                    derived_result = drive_client.upload_file(
+                        derived_path,
+                        source_folder_id
+                    )
+                    uploaded_files.append({
+                        'name': Path(derived_path).name,
+                        'id': derived_result['id'],
+                        'url': derived_result['url'],
+                        'metadata': {
+                            'derived_from': doc_info['file_info']['name'],
+                            'variant': label,
+                        },
+                    })
+                    self.logger.info(f"Uploaded derived file for NotebookLM: {derived_path}")
+                except Exception as e:
+                    self.logger.warning(f"Failed to upload derived file {derived_path}: {e}")
         
         # Try to extract client info from first document
         if uploaded_files:

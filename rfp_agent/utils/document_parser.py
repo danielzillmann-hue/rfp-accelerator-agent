@@ -8,6 +8,9 @@ from typing import Dict, Any, Optional
 
 import PyPDF2
 from docx import Document
+import openpyxl
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 
 class DocumentParser:
@@ -34,6 +37,8 @@ class DocumentParser:
             '.docx': DocumentParser._parse_docx,
             '.doc': DocumentParser._parse_doc,
             '.txt': DocumentParser._parse_txt,
+            '.xlsx': DocumentParser._parse_excel,
+            '.xls': DocumentParser._parse_excel,
         }
         
         parser = parsers.get(extension)
