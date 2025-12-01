@@ -30,7 +30,7 @@
             agent will set up the full workspace with NotebookLM, folders, and documents.
           </p>
 
-          <form method="post" action="/ui/run-workflow" class="space-y-5">
+          <form method="post" action="/ui/run-workflow" enctype="multipart/form-data" class="space-y-5">
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-1.5">
                 <label for="client_name" class="block text-sm font-medium text-slate-200">Client name</label>
@@ -59,9 +59,24 @@
             <div class="space-y-1.5">
               <label class="block text-sm font-medium text-slate-200">RFP source</label>
               <p class="text-xs text-slate-400 mb-2">
-                Use <span class="font-semibold text-slate-200">either</span> inline content or a Google Drive file URL/ID.
+                You can <span class="font-semibold text-slate-200">upload one or more RFP documents</span>, paste inline
+                content, or provide a Google Drive file URL/ID.
               </p>
-              <div class="grid gap-4 md:grid-cols-2">
+              <div class="grid gap-4 md:grid-cols-3">
+                <div class="space-y-1.5">
+                  <label for="rfp_files" class="block text-xs font-medium text-slate-300">Upload documents</label>
+                  <input
+                    id="rfp_files"
+                    name="rfp_files"
+                    type="file"
+                    multiple
+                    class="block w-full text-xs text-slate-200 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-500 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:bg-indigo-400 cursor-pointer"
+                  />
+                  <p class="text-xs text-slate-500">
+                    Upload PDFs, Word docs, or other supported formats. They will be added to the Drive folder and
+                    NotebookLM sources.
+                  </p>
+                </div>
                 <div class="space-y-1.5">
                   <label for="rfp_content" class="block text-xs font-medium text-slate-300">Inline content</label>
                   <textarea
@@ -69,7 +84,7 @@
                     name="rfp_content"
                     rows="7"
                     class="w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Paste RFP text here (optional if you provide a Drive file)..."
+                    placeholder="Paste RFP text here (optional if you provide files or a Drive link)..."
                   ></textarea>
                 </div>
                 <div class="space-y-1.5">
@@ -82,8 +97,8 @@
                     placeholder="https://drive.google.com/file/d/..."
                   />
                   <p class="text-xs text-slate-500">
-                    The backend will download the file, ingest it into the workflow, and use it as the primary RFP
-                    document.
+                    The backend will download the file, ingest it into the workflow, and use it as an additional RFP
+                    source.
                   </p>
                 </div>
               </div>
