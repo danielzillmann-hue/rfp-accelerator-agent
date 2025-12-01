@@ -21,4 +21,4 @@ COPY . .
 ENV PORT=8080
 
 # Run the main FastAPI server (with JSON API and HTML UI)
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port $PORT"]
